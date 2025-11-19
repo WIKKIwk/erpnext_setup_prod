@@ -77,6 +77,7 @@ configure_apt() {
     debianutils \
     git \
     htop \
+    ansible \
     libffi-dev \
     libssl-dev \
     libjpeg8-dev \
@@ -177,6 +178,18 @@ install_bench() {
   sudo -u "${ERP_USER}" -H bash -c "pipx ensurepath >/dev/null 2>&1 || true"
 }
 
+install_ansible_cmd() {
+  run_step "Installing ansible in frappe pipx env" sudo -u "${ERP_USER}" -H bash -c "pipx install --force ansible"
+  local ansible_bin="/home/${ERP_USER}/.local/bin/ansible"
+  local ansible_playbook_bin="/home/${ERP_USER}/.local/bin/ansible-playbook"
+  if [[ -x "${ansible_bin}" ]]; then
+    ln -sf "${ansible_bin}" /usr/local/bin/ansible
+  fi
+  if [[ -x "${ansible_playbook_bin}" ]]; then
+    ln -sf "${ansible_playbook_bin}" /usr/local/bin/ansible-playbook
+  fi
+}
+
 link_bench_binary() {
   local bench_binary="/home/${ERP_USER}/.local/bin/bench"
   if [[ ! -x "${bench_binary}" ]]; then
@@ -239,6 +252,7 @@ main() {
   configure_redis
   create_erp_user
   install_bench
+  install_ansible_cmd
   link_bench_binary
   ensure_process_manager
   setup_bench_instance
@@ -248,4 +262,3 @@ main() {
 }
 
 main "$@"
-
